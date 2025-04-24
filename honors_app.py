@@ -6,10 +6,27 @@ import random
 from keras.models import load_model
 
 # Load your trained model
-model = load_model(r"C:\Users\Ganesh\Downloads\ppe_honors.h5")
+# model = load_model(r"C:\Users\Ganesh\Downloads\ppe_honors.h5")
+
+import requests
+import tempfile
+
+@st.cache_resource
+def load_remote_model():
+    url = "https://huggingface.co/ganeshmohane/ppe_detection/resolve/main/ppe_honors.h5"
+    response = requests.get(url)
+    if response.status_code == 200:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".h5") as tmp:
+            tmp.write(response.content)
+            return load_model(tmp.name)
+    else:
+        st.error("Failed to download model.")
+        return None
+
+model = load_remote_model()
 
 # Define desired classes
-desired_classes = ['ppe_suit', 'Face_Shield', 'Glove', 'Google', 'Mask']
+desired_classes = ['ppe_suit', 'Face_Shield', 'Glove', 'Goggle', 'Mask']
 
 def predict_ppe(image, model):
     # Preprocess the image
@@ -116,7 +133,7 @@ if st.button("Predict"):
         st.error("Please upload an image.")
 
 # Random image prediction button
-base_path = r"C:\Users\Ganesh\Downloads\labelling.v2i.multiclass\train"  # Replace with your actual base path
+base_path = r"D:\Desktop\PROJs\safteycheck\dataset\ppe_equipments\train"  # Replace with your actual base path
 if st.button("Predict Random Image"):
     random_prediction, random_image_path = predict_random_image(model, base_path)
     
